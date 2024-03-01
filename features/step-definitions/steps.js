@@ -1,29 +1,23 @@
-import { Given, When, Then } from '@wdio/cucumber-framework';
+const { Given, When, Then } = require('@wdio/cucumber-framework');
+const { expect, $ } = require('@wdio/globals')
 
-import SecurePage from '../pageobjects/secure.page.js';
+const LoginPage = require('../pageobjects/login.page');
+const SecurePage = require('../pageobjects/secure.page');
 
 const pages = {
     login: LoginPage
 }
 
-const { Given, When, Then } = require('cucumber');
-
-Given('I am on the SauceDemo login page', () => {
-    browser.url('https://www.saucedemo.com/');
+Given(/^I am on the (\w+) page$/, async (page) => {
+    await pages[page].open()
 });
 
-When('I enter valid username and password', () => {
-    $('#user-name').setValue('standard_user');
-    $('#password').setValue('secret_sauce');
+When(/^I login with (\w+) and (.+)$/, async (username, password) => {
+    await LoginPage.login(username, password)
 });
 
-When('I click the login button', () => {
-    $('#login-button').click();
+Then(/^I should see a flash message saying (.*)$/, async (message) => {
+    await expect(SecurePage.flashAlert).toBeExisting();
+    await expect(SecurePage.flashAlert).toHaveTextContaining(message);
 });
-
-Then('I should be on the products page', () => {
-    expect(browser.getUrl()).to.include('/inventory.html');
-    expect($('.title')).toHaveTextContaining('Products');
-});
-
 
